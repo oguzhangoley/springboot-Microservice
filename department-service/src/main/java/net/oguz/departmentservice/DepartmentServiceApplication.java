@@ -16,4 +16,5 @@ public class DepartmentServiceApplication {
         SpringApplication.run(DepartmentServiceApplication.class, args);
     }
 
+    //java -jar target/department-service-0.0.1-SNAPSHOT.jar --server.port=8092
 }
