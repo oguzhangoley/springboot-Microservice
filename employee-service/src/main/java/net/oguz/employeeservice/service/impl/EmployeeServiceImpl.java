@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import net.oguz.employeeservice.dto.ApiResponseDto;
 import net.oguz.employeeservice.dto.DepartmentDto;
 import net.oguz.employeeservice.dto.EmployeeDto;
+import net.oguz.employeeservice.dto.OrganizationDto;
 import net.oguz.employeeservice.entity.Employee;
 import net.oguz.employeeservice.exception.exceptions.EmployeeNotFoundException;
 import net.oguz.employeeservice.repository.EmployeeRepository;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Service
 @AllArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
@@ -24,7 +28,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeRepository employeeRepository;
     private ModelMapper modelMapper;
     //    private RestTemplate restTemplate;
-//    private WebClient webClient;
+    private WebClient webClient;
     private APIClient apiClient;
 
     @Override
@@ -35,7 +39,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return modelMapper.map(savedEmployee, EmployeeDto.class);
     }
 
-//    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
+    //    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     @Retry(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     @Override
     public ApiResponseDto getEmployeeById(long employeeId) {
@@ -53,9 +57,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 //                .block();
 //        //----
         DepartmentDto departmentDto = apiClient.getDepartmentByCode(employee.getDepartmentCode());
+        OrganizationDto organizationDto = webClient.get()
+                .uri("http://localhost:8093/api/organizations/" + employee.getOrganizationCode())
+                .retrieve()
+                .bodyToMono(OrganizationDto.class)
+                .block();
         return new ApiResponseDto(
                 modelMapper.map(employee, EmployeeDto.class),
-                departmentDto
+                departmentDto,
+                organizationDto
         );
     }
 
@@ -69,7 +79,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         );
         return new ApiResponseDto(
                 modelMapper.map(employee, EmployeeDto.class),
-                departmentDto
+                departmentDto,
+                new OrganizationDto(
+                        0,"ORG","ORG Description","ORG_ORG", LocalDateTime.now()
+                )
         );
     }
 }
