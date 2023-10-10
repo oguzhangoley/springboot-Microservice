@@ -7,6 +7,7 @@ import net.oguz.employeeservice.dto.EmployeeDto;
 import net.oguz.employeeservice.entity.Employee;
 import net.oguz.employeeservice.exception.exceptions.EmployeeNotFoundException;
 import net.oguz.employeeservice.repository.EmployeeRepository;
+import net.oguz.employeeservice.service.APIClient;
 import net.oguz.employeeservice.service.EmployeeService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeRepository employeeRepository;
     private ModelMapper modelMapper;
     //    private RestTemplate restTemplate;
-    private WebClient webClient;
+//    private WebClient webClient;
+    private APIClient apiClient;
 
     @Override
     public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
@@ -39,13 +41,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 //                DepartmentDto.class);
 //        DepartmentDto departmentDto = responseEntity.getBody();
 //       //----------
-        //Web Client ----
-        DepartmentDto departmentDto = webClient.get()
-                .uri("http://localhost:8090/api/departments/" + employee.getDepartmentCode())
-                .retrieve()
-                .bodyToMono(DepartmentDto.class)
-                .block();
-        //----
+//        //Web Client ----
+//        DepartmentDto departmentDto = webClient.get()
+//                .uri("http://localhost:8090/api/departments/" + employee.getDepartmentCode())
+//                .retrieve()
+//                .bodyToMono(DepartmentDto.class)
+//                .block();
+//        //----
+        DepartmentDto departmentDto = apiClient.getDepartmentByCode(employee.getDepartmentCode());
         return new ApiResponseDto(
                 modelMapper.map(employee, EmployeeDto.class),
                 departmentDto
