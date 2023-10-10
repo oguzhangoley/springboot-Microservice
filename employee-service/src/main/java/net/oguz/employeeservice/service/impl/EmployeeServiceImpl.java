@@ -1,5 +1,7 @@
 package net.oguz.employeeservice.service.impl;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import net.oguz.employeeservice.dto.ApiResponseDto;
 import net.oguz.employeeservice.dto.DepartmentDto;
@@ -33,6 +35,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         return modelMapper.map(savedEmployee, EmployeeDto.class);
     }
 
+//    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
+    @Retry(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     @Override
     public ApiResponseDto getEmployeeById(long employeeId) {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException("Employee", "id", employeeId));
@@ -49,6 +53,20 @@ public class EmployeeServiceImpl implements EmployeeService {
 //                .block();
 //        //----
         DepartmentDto departmentDto = apiClient.getDepartmentByCode(employee.getDepartmentCode());
+        return new ApiResponseDto(
+                modelMapper.map(employee, EmployeeDto.class),
+                departmentDto
+        );
+    }
+
+    public ApiResponseDto getDefaultDepartment(long employeeId, Exception exception) {
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException("Employee", "id", employeeId));
+        DepartmentDto departmentDto = new DepartmentDto(
+                0,
+                "R&D Department",
+                "Research and Development Department",
+                "RD001"
+        );
         return new ApiResponseDto(
                 modelMapper.map(employee, EmployeeDto.class),
                 departmentDto
