@@ -1,6 +1,7 @@
 package net.oguz.employeeservice.controller;
 
 import lombok.AllArgsConstructor;
+import net.oguz.employeeservice.dto.ApiResponseDto;
 import net.oguz.employeeservice.dto.EmployeeDto;
 import net.oguz.employeeservice.service.EmployeeService;
 import org.springframework.http.HttpStatus;
@@ -22,8 +23,8 @@ public class EmployeeController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable long id){
-        EmployeeDto employeeDto = employeeService.getEmployeeById(id);
-        return new ResponseEntity<>(employeeDto,HttpStatus.OK);
+    public ResponseEntity<ApiResponseDto> getEmployeeById(@PathVariable long id){
+        ApiResponseDto apiResponseDto = employeeService.getEmployeeById(id);
+        return new ResponseEntity<>(apiResponseDto,HttpStatus.OK);
     }
 }
